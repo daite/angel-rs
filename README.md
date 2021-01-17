@@ -1,6 +1,6 @@
 [![Build Status](https://travis-ci.com/daite/torrent.svg?branch=main)](https://travis-ci.com/daite/torrent)
-# torrent
-search torrent magnet file 
+# What's this?
+ ** search torrent magnet file 
 # available sites
 | No |    site    |          url          | status |
 |:--:|:----------:|:---------------------:|:------:|
