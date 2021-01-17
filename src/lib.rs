@@ -114,11 +114,26 @@ mod tests {
             ("살림하는 남자들 시즌2.E141.200219.720p-NEXT".to_owned(),
             "https://ttobogo.net/post/17920".to_owned()),
         ];
-        println!("{:?}", data);
         let result = tokio_test::block_on(ttobogo::get_data(search_words)).unwrap();
-        println!("{:?}", result);
         for n in 0..data.len() {
             assert_eq!(data[n], result[n]);
         }
+    }
+    #[test]
+    fn test_hell(){
+        let magnet_prefix = "magnet:?xt=urn:btih:";
+        let re = Regex::new(r"[0-9a-z]{40}").unwrap();
+        let client = reqwest::blocking::Client::new();
+        let res = client.get("https://ttobogo.net/post/160049")
+                  .header(USER_AGENT, consts::MY_USER_AGENT)
+                  .send().unwrap();
+        let body = res.text().unwrap();
+        let doc = Document::from(&body[..]);
+        let title = doc.find(Attr("class", "btn btn-blue"))
+                   .next().unwrap()
+                   .attr("onclick").unwrap();
+        let cap = re.captures(title).unwrap();
+        let magnet = format!("{}{}", magnet_prefix, &cap[0]);
+        assert_eq!(magnet, "magnet:?xt=urn:btih:d77a44e97d82ee818f017a3f7cf0dc6c5e625357");
     }
 }
