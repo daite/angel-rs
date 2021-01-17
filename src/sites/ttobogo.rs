@@ -1,12 +1,4 @@
-use reqwest;
-use reqwest::header::USER_AGENT;
-use select::document::Document;
-use select::predicate::{Attr};
-use std::error::Error;
-use std::sync::{Mutex, Arc};
-use regex::Regex;
-use crate::{consts, print_table};
-
+use crate::*;
 
 #[tokio::main]
 pub async fn run(search_words: &str) -> Result<(), Box<dyn Error>> {

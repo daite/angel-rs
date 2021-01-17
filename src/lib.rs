@@ -1,5 +1,12 @@
 #[macro_use] extern crate prettytable;
 use prettytable::{Table, Row, Cell, format};
+use reqwest;
+use reqwest::header::USER_AGENT;
+use select::document::Document;
+use select::predicate::{Attr};
+use std::error::Error;
+use std::sync::{Mutex, Arc};
+use regex::Regex;
 
 pub mod sites;
 mod consts;
