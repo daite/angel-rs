@@ -72,6 +72,7 @@ pub async fn get_magnet(bbs_url: &str) -> Result<String, Box<dyn Error>> {
 
 #[cfg(test)]
 mod tests {
+    use super::*;
     #[test]
     fn test_get_magnet_function() {
         let data = vec![
@@ -83,7 +84,7 @@ mod tests {
         "magnet:?xt=urn:btih:000e523427aa08e249058fb90f230fe92e9e3adc"),
         ];
         for d in data {
-            assert_eq!(tokio_test::block_on(ttobogo::get_magnet(d.0)).unwrap(), d.1);
+            assert_eq!(tokio_test::block_on(get_magnet(d.0)).unwrap(), d.1);
         }
     }
     #[test]
@@ -95,7 +96,7 @@ mod tests {
             ("살림하는 남자들 시즌2.E141.200219.720p-NEXT".to_owned(),
             "https://ttobogo.net/post/17920".to_owned()),
         ];
-        let result = tokio_test::block_on(ttobogo::get_data(search_words)).unwrap();
+        let result = tokio_test::block_on(get_data(search_words)).unwrap();
         for n in 0..data.len() {
             assert_eq!(data[n], result[n]);
         }
