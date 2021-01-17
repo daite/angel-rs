@@ -88,7 +88,7 @@ pub mod ttobogo {
     }
 }
 
-#[tokio::test]
+#[tokio::test(flavor = "multi_thread")]
 async fn test_get_magnet_function() {
     let data = vec![
         ("https://ttobogo.net/post/160049", 
@@ -103,7 +103,7 @@ async fn test_get_magnet_function() {
     }
 }
 
-#[tokio::test]
+#[tokio::test(flavor = "multi_thread")]
 async fn test_get_data_function() {
     let search_words = "https://ttobogo.net/search?skeyword=%EC%8B%9C%EC%A6%8C2.E141";
     let data = vec![
