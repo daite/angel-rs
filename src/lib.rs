@@ -9,7 +9,7 @@ use std::sync::{Mutex, Arc};
 use regex::Regex;
 
 pub mod sites;
-mod consts;
+pub mod consts;
 
 pub fn print_table(p: Vec<(String, String)>) {
     let mut table = Table::new();
