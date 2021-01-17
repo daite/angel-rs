@@ -74,6 +74,8 @@ mod tests {
         "magnet:?xt=urn:btih:2039d8aebb9f406cfc114c909982d36460b65639"),
         ("https://ttobogo.net/post/178001",
         "magnet:?xt=urn:btih:000e523427aa08e249058fb90f230fe92e9e3adc"),
+        ("https://ttobogo.net/post/170793",
+        "magnet:?xt=urn:btih:c2f7e50f853f3d3aacd585d00fc1c3e64c123153"),
         ];
         for d in data {
             assert_eq!(tokio_test::block_on(get_magnet(d.0)).unwrap(), d.1);

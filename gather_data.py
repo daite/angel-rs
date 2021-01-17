@@ -17,28 +17,37 @@ def debug(func):
         return func(*args, **kwds)
     return wrapper
 
-def get_tags(url, find_tag, tag_class_name):
-    r = requests.get(url, headers=headers)
-    soup = BS(r.content, "lxml")
-    tags = soup.find_all(find_tag, {'class': tag_class_name})
-    return tags
+class TTobogo:
 
-def get_bbs_urls(search_url):
-    bbs_urls = []
-    tags = get_tags(search_url, 'a', "subject")
-    for tag in tags:
-        bbs_urls.append(tag["href"])
-    return bbs_urls
+    def __init__(self, search_words):
+        self.search_url =  "https://ttobogo.net/search?skeyword={}"\
+            .format(search_words)
+    
+    def get_tags(self, url, find_tag, tag_class_name):
+        r = requests.get(url, headers=headers)
+        soup = BS(r.content, "lxml")
+        tags = soup.find_all(find_tag, {'class': tag_class_name})
+        return tags
+    
+    def get_bbs_urls(self):
+        bbs_urls = []
+        tags = self.get_tags(self.search_url, 'a', "subject")
+        for tag in tags:
+            bbs_urls.append(tag["href"])
+        return bbs_urls
 
-@debug
-def get_magnet(bbs_url):
-    tag = get_tags(bbs_url, 'a', "btn btn-blue")
-    magnet = tag[0]["onclick"].split("'")[1]
-    return magnet
+    def get_magnet(self, bbs_url):
+        tag = self.get_tags(bbs_url, 'a', "btn btn-blue")
+        magnet = tag[0]["onclick"].split("'")[1]
+        return magnet
 
-
-if __name__ == "__main__":
-    search_url = "https://ttobogo.net/search?skeyword=%EC%96%B4%EC%84%9C%EC%99%80+%ED%95%9C%EA%B5%AD%EC%9D%80+%EC%B2%98%EC%9D%8C%EC%9D%B4%EC%A7%80"
-    for bbs_url in get_bbs_urls(search_url):
-        fm = '("' + bbs_url  + '",' + "\n" + '"' + get_magnet(bbs_url) + '"),'
+def gather_ttobogo_data():
+    keyword = "어서와+한국은+처음이지"
+    t = TTobogo(keyword)
+    for bbs_url in t.get_bbs_urls():
+        fm = '("' + bbs_url  + '",' + "\n" + '"' \
+            + t.get_magnet(bbs_url) + '"),'
         print(fm)
+
+if __name__ == '__main__':
+    gather_ttobogo_data()
