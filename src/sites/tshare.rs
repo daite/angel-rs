@@ -2,7 +2,7 @@ use crate::*;
 
 #[tokio::main]
 pub async fn run(search_words: &str) -> Result<(), Box<dyn Error>> {
-    let search_url = format!("{}{}", consts::TTOBOGO_SEARCH_URL, search_words);
+    let search_url = format!("{}{}", consts::TSHARE_SEARCH_URL, search_words);
     let data = get_data(&search_url).await?;
     let mut tasks = vec![];
     
@@ -36,17 +36,25 @@ pub async fn get_data(search_url: &str) -> Result<Vec<(String, String)>, Box<dyn
     let body = res.text().await?;
     let doc = Document::from(&body[..]);
     let mut data: Vec<(String, String)> = vec![];
-    for node in doc.find(Attr("class", "subject")) {
-        let title = node.attr("title").unwrap().to_owned();
-        let link = node.attr("href").unwrap().to_owned();
+    for node in doc.find(Attr("class", "list-item-row")) {
+        let title = node.find(Attr("class", "matter"))
+                    .next()
+                    .unwrap()
+                    .find(Name("p"))
+                    .next()
+                    .unwrap()
+                    .text().to_owned();
+       let link = node.find(Name("a"))
+                    .next()
+                    .unwrap()
+                    .attr("href")
+                    .unwrap().to_owned();
         data.push((title, link));
     }
     Ok(data)
 }
 
 pub async fn get_magnet(bbs_url: &str) -> Result<String, Box<dyn Error>> {
-    let magnet_prefix = "magnet:?xt=urn:btih:";
-    let re = Regex::new(r"[0-9a-z]{40}").unwrap();
     let client = reqwest::Client::new();
     let res = client.get(bbs_url)
               .header(USER_AGENT, consts::MY_USER_AGENT)
@@ -54,12 +62,16 @@ pub async fn get_magnet(bbs_url: &str) -> Result<String, Box<dyn Error>> {
               .await?;
     let body = res.text().await?;
     let doc = Document::from(&body[..]);
-    let title = doc.find(Attr("class", "btn btn-blue"))
-               .next().unwrap()
-               .attr("onclick").unwrap();
-    let cap = re.captures(title).unwrap();
-    let magnet = format!("{}{}", magnet_prefix, &cap[0]);
-    Ok(magnet)
+    let magnet = doc.find(Name("td"))
+                .skip(1)
+                .next()
+                .unwrap()
+                .find(Name("a"))
+                .next()
+                .unwrap()
+                .attr("href")
+                .unwrap().to_owned();
+   Ok(magnet)
 }
 
 #[cfg(test)]
@@ -68,14 +80,12 @@ mod tests {
     #[test]
     fn test_get_magnet_function() {
         let data = vec![
-        ("https://ttobogo.net/post/160049", 
+        ("https://tshare.org/entertainment/13062", 
+        "magnet:?xt=urn:btih:6bb34701c93505114029e5c91a0e88a30c11703b"),
+        ("https://tshare.org/entertainment/12870",
+        "magnet:?xt=urn:btih:ecf2f09ab88bfbf3c1f8e8dac02faff638433d23"),
+        ("https://tshare.org/entertainment/12366",
         "magnet:?xt=urn:btih:d77a44e97d82ee818f017a3f7cf0dc6c5e625357"),
-        ("https://ttobogo.net/post/181711",
-        "magnet:?xt=urn:btih:2039d8aebb9f406cfc114c909982d36460b65639"),
-        ("https://ttobogo.net/post/178001",
-        "magnet:?xt=urn:btih:000e523427aa08e249058fb90f230fe92e9e3adc"),
-        ("https://ttobogo.net/post/170793",
-        "magnet:?xt=urn:btih:c2f7e50f853f3d3aacd585d00fc1c3e64c123153"),
         ];
         for d in data {
             assert_eq!(tokio_test::block_on(get_magnet(d.0)).unwrap(), d.1);
@@ -83,12 +93,12 @@ mod tests {
     }
     #[test]
     fn test_get_data_function() {
-        let search_url = format!("{}{}", consts::TTOBOGO_SEARCH_URL, "시즌2.E141");
+        let search_url = format!("{}{}", consts::TSHARE_SEARCH_URL, "E177.201228.720p");
         let data = vec![
-            ("어서와 한국은 처음이지 시즌2.E141.210114.720p-NEXT".to_owned(), 
-            "https://ttobogo.net/post/181711".to_owned()),
-            ("살림하는 남자들 시즌2.E141.200219.720p-NEXT".to_owned(),
-            "https://ttobogo.net/post/17920".to_owned()),
+            ("동상이몽2 너는 내운명.E177.201228.720p-NEXT.mp4".to_owned(), 
+            "https://tshare.org/entertainment/13065".to_owned()),
+            ("동상이몽2 너는 내운명.E177.201228.720p-NEXT".to_owned(),
+            "https://tshare.org/entertainment/13062".to_owned()),
         ];
         let result = tokio_test::block_on(get_data(&search_url)).unwrap();
         for n in 0..data.len() {

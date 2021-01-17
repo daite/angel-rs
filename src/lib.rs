@@ -3,7 +3,7 @@ use prettytable::{Table, Row, Cell, format};
 use reqwest;
 use reqwest::header::USER_AGENT;
 use select::document::Document;
-use select::predicate::{Attr};
+use select::predicate::{Attr, Name};
 use std::error::Error;
 use std::sync::{Mutex, Arc};
 use regex::Regex;

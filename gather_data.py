@@ -49,5 +49,24 @@ def gather_ttobogo_data():
             + t.get_magnet(bbs_url) + '"),'
         print(fm)
 
-if __name__ == '__main__':
-    gather_ttobogo_data()
+
+class Torrentdia:
+
+    def __init__(self, search_words):
+        self.search_url =  "https://www.torrentdia.com/bbs/search.php?stx={}"\
+            .format(search_words)
+    
+    def get_tags(self, url, find_tag, tag_class_name):
+        r = requests.get(url, headers=headers)
+        soup = BS(r.content, "lxml")
+        tags = soup.find_all(find_tag, {'class': tag_class_name})
+        return tags
+    
+    def get_bbs_urls(self):
+        bbs_urls = []
+        tags = self.get_tags(self.search_url, 'td', "list-subject web-subject")
+        for tag in tags:
+            bbs_url = requests.compat.urljoin(self.search_url, \
+            tag.find("a", href=True)["href"])
+            bbs_urls.append(bbs_url)
+        return bbs_urls
