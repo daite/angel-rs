@@ -88,32 +88,36 @@ pub mod ttobogo {
     }
 }
 
-#[tokio::test(flavor = "multi_thread")]
-async fn test_get_magnet_function() {
-    let data = vec![
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn test_get_magnet_function() {
+        let data = vec![
         ("https://ttobogo.net/post/160049", 
         "magnet:?xt=urn:btih:d77a44e97d82ee818f017a3f7cf0dc6c5e625357"),
         ("https://ttobogo.net/post/181711",
         "magnet:?xt=urn:btih:2039d8aebb9f406cfc114c909982d36460b65639"),
         ("https://ttobogo.net/post/178001",
         "magnet:?xt=urn:btih:000e523427aa08e249058fb90f230fe92e9e3adc"),
-    ];
-    for d in data {
-        assert_eq!(&ttobogo::get_magnet(d.0).await.unwrap()[..], d.1);
+        ];
+        for d in data {
+            assert_eq!(tokio_test::block_on(ttobogo::get_magnet(d.0)).unwrap(), d.1);
+        }
+    }
+    #[test]
+    fn test_get_data_function() {
+        let search_words = "https://ttobogo.net/search?skeyword=%EC%8B%9C%EC%A6%8C2.E141";
+        let data = vec![
+            ("어서와 한국은 처음이지 시즌2.E141.210114.720p-NEXT".to_owned(), 
+            "https://ttobogo.net/post/181711".to_owned()),
+            ("살림하는 남자들 시즌2.E141.200219.720p-NEXT".to_owned(),
+            "https://ttobogo.net/post/17920".to_owned()),
+        ];
+        let result = tokio_test::block_on(ttobogo::get_data(search_words)).unwrap();
+        for n in 0..data.len() {
+            assert_eq!(data[n], result[n]);
+        }
     }
 }
 
-#[tokio::test(flavor = "multi_thread")]
-async fn test_get_data_function() {
-    let search_words = "https://ttobogo.net/search?skeyword=%EC%8B%9C%EC%A6%8C2.E141";
-    let data = vec![
-        ("어서와 한국은 처음이지 시즌2.E141.210114.720p-NEXT".to_owned(), 
-        "https://ttobogo.net/post/181711".to_owned()),
-        ("살림하는 남자들 시즌2.E141.200219.720p-NEXT".to_owned(),
-        "https://ttobogo.net/post/17920".to_owned()),
-    ];
-    let result = ttobogo::get_data(search_words).await.unwrap();
-    for n in 0..data.len() {
-        assert_eq!(data[n], result[n]);
-    }
-}
