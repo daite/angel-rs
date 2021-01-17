@@ -114,10 +114,11 @@ mod tests {
             ("살림하는 남자들 시즌2.E141.200219.720p-NEXT".to_owned(),
             "https://ttobogo.net/post/17920".to_owned()),
         ];
+        println!("{:?}", data);
         let result = tokio_test::block_on(ttobogo::get_data(search_words)).unwrap();
+        println!("{:?}", result);
         for n in 0..data.len() {
             assert_eq!(data[n], result[n]);
         }
     }
 }
-
