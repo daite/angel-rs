@@ -5,7 +5,7 @@ fn main() {
     let matches = App::new("fetch torrent magnet")
         .version("0.1.0")
         .author("daite <blueskykind02@yahoo.co.jp>")
-        .about("search torrent files")
+        .about("search torrent magnet")
         .arg(Arg::with_name("keyword")
                  .short("s")
                  .long("search")
