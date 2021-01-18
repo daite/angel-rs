@@ -13,7 +13,7 @@ fn main() {
                  .help("search torrent magnet file"))
         .get_matches();
     let myfile = matches.value_of("keyword").unwrap_or("동상이몽");
-   if let Err(e) = sites::ttobogo::run(myfile) {
+    if let Err(e) = sites::ttobogo::run(myfile) {
        println!("{}", e);
    }
 }
