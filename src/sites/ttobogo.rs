@@ -4,6 +4,10 @@ use crate::*;
 pub async fn run(search_words: &str) -> Result<(), Box<dyn Error>> {
     let search_url = format!("{}{}", consts::TTOBOGO_SEARCH_URL, search_words);
     let data = get_data(&search_url).await?;
+    if data.len() == 0 {
+        println!("**** [TTOBOGO] NO TORRENT DATA ****");
+        return Ok(())
+    }
     let mut tasks = vec![];
     
     let r: Vec<(String, String)> = vec![];
@@ -54,12 +58,13 @@ pub async fn get_magnet(bbs_url: &str) -> Result<String, Box<dyn Error>> {
               .await?;
     let body = res.text().await?;
     let doc = Document::from(&body[..]);
-    let title = doc.find(Attr("class", "btn btn-blue"))
-               .next().unwrap()
-               .attr("onclick").unwrap();
-    let cap = re.captures(title).unwrap();
-    let magnet = format!("{}{}", magnet_prefix, &cap[0]);
-    Ok(magnet)
+    if let Some(node) = doc.find(Attr("class", "btn btn-blue")).next() {
+        let title = node.attr("onclick").unwrap();
+        let cap = re.captures(title).unwrap();
+        let magnet = format!("{}{}", magnet_prefix, &cap[0]);
+        return Ok(magnet)
+    }
+    Ok(String::from("NO MAGNET"))
 }
 
 #[cfg(test)]
