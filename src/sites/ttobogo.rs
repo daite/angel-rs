@@ -1,12 +1,12 @@
 use crate::*;
 
 #[tokio::main]
-pub async fn run(search_words: &str) -> Result<(), Box<dyn Error>> {
+pub async fn run(search_words: &str) -> Result<DataStatus, Box<dyn Error>> {
     let search_url = format!("{}{}", consts::TTOBOGO_SEARCH_URL, search_words);
     let data = get_data(&search_url).await?;
     if data.len() == 0 {
         println!("**** [TTOBOGO] NO TORRENT DATA ****");
-        return Ok(())
+        return Ok(DataStatus::NotFound)
     }
     let mut tasks = vec![];
     
@@ -17,6 +17,9 @@ pub async fn run(search_words: &str) -> Result<(), Box<dyn Error>> {
         let result = Arc::clone(&result);
         tasks.push(tokio::spawn(async move {
            let magnet = get_magnet(&d.1).await.unwrap();
+           if magnet == "NO MAGNET" {
+               return
+           }
            let mut r = result.lock().unwrap();
            (*r).push((d.0, magnet));
         }));
@@ -28,7 +31,7 @@ pub async fn run(search_words: &str) -> Result<(), Box<dyn Error>> {
     p.sort();
     p.reverse();
     print_table(p.to_vec());
-    Ok(())
+    Ok(DataStatus::Found)
 }
 
 pub async fn get_data(search_url: &str) -> Result<Vec<(String, String)>, Box<dyn Error>> {

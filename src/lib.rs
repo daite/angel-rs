@@ -12,6 +12,11 @@ use url::Url;
 pub mod sites;
 pub mod consts;
 
+pub enum DataStatus {
+  Found,
+  NotFound,
+}
+
 pub fn print_table(p: Vec<(String, String)>) {
     let mut table = Table::new();
     table.set_titles(row!["Title", "Magnet"]);

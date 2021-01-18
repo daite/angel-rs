@@ -12,8 +12,19 @@ fn main() {
                  .takes_value(true)
                  .help("search torrent magnet file"))
         .get_matches();
-    let myfile = matches.value_of("keyword").unwrap_or("동상이몽");
-    if let Err(e) = sites::ttobogo::run(myfile) {
-       println!("{}", e);
-   }
+    let myfile = matches.value_of("keyword").unwrap_or("동상이몽2");  
+    let result = sites::ttobogo::run(myfile);
+    match result {
+        Ok(status) => {
+            match status {
+                DataStatus::Found => (),
+                DataStatus::NotFound => {
+                    if let Err(e) = sites::torrentmobile::run(myfile) {
+                        println!("{:?}", e);
+                    }
+                }
+            }
+        }
+        Err(e) => println!("{:?}", e),
+    }
 }

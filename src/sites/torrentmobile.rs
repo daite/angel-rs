@@ -1,9 +1,13 @@
 use crate::*;
 
 #[tokio::main]
-pub async fn run(search_words: &str) -> Result<(), Box<dyn Error>> {
+pub async fn run(search_words: &str) -> Result<DataStatus, Box<dyn Error>> {
     let search_url = format!("{}{}", consts::TORRENTMOBILE_SEARCH_URL, search_words);
     let data = get_data(&search_url).await?;
+    if data.len() == 0 {
+        println!("**** [TORRENTMOBILE] NO TORRENT DATA ****");
+        return Ok(DataStatus::NotFound)
+    }
     let mut tasks = vec![];
     
     let r: Vec<(String, String)> = vec![];
@@ -12,7 +16,10 @@ pub async fn run(search_words: &str) -> Result<(), Box<dyn Error>> {
     for d in data {
         let result = Arc::clone(&result);
         tasks.push(tokio::spawn(async move {
-           let magnet = get_magnet(&d.1).await.unwrap();
+            let magnet = get_magnet(&d.1).await.unwrap();
+            if magnet == "NO MAGNET" {
+                return
+            }
            let mut r = result.lock().unwrap();
            (*r).push((d.0, magnet));
         }));
@@ -24,7 +31,7 @@ pub async fn run(search_words: &str) -> Result<(), Box<dyn Error>> {
     p.sort();
     p.reverse();
     print_table(p.to_vec());
-    Ok(())
+    Ok(DataStatus::Found)
 }
 
 pub async fn get_data(search_url: &str) -> Result<Vec<(String, String)>, Box<dyn Error>> {
@@ -63,13 +70,13 @@ pub async fn get_magnet(bbs_url: &str)  -> Result<String, Box<dyn Error>> {
               .await?;
     let body = res.text().await?;
     let doc = Document::from(&body[..]);
-    let magnet = doc.find(Attr("class", "list-group-item en font-14 break-word"))
-               .next()
-               .unwrap()
-               .text()
-               .trim()
-               .to_owned();
-    Ok(magnet)
+    if let Some(node) = doc.find(Attr("class", "list-group-item en font-14 break-word")).next() {
+        let result = node.text()
+                    .trim()
+                    .to_owned();
+        return Ok(result)
+    }     
+    Ok(String::from("NO MAGNET"))
 }
 
 #[cfg(test)]
