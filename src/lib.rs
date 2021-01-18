@@ -7,6 +7,7 @@ use select::predicate::{Attr, Name};
 use std::error::Error;
 use std::sync::{Mutex, Arc};
 use regex::Regex;
+use url::Url;
 
 pub mod sites;
 pub mod consts;
